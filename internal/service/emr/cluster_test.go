@@ -1811,7 +1811,7 @@ resource "aws_security_group" "test" {
 
   tags = {
     Name                                     = %[1]q
-	for-use-with-amazon-emr-managed-policies = true
+    for-use-with-amazon-emr-managed-policies = true
   }
 
   # EMR will modify ingress rules
@@ -1827,8 +1827,8 @@ resource "aws_subnet" "test" {
   vpc_id                  = aws_vpc.test.id
 
   tags = {
-    Name 									 = %[1]q
-	for-use-with-amazon-emr-managed-policies = true
+    Name                                     = %[1]q
+    for-use-with-amazon-emr-managed-policies = true
   }
 }
 
@@ -4005,60 +4005,59 @@ func testAccClusterIAMServiceRoleBaseConfig_PlacementGroup(rName string) string 
 	return acctest.ConfigCompose(
 		fmt.Sprintf(`
 resource "aws_iam_role" "emr_service" {
-	name = "%[1]s_default_role"
-	
-	assume_role_policy = <<EOT
+  name               = "%[1]s_default_role"
+  assume_role_policy = <<EOT
 {
-	"Version": "2008-10-17",
-	"Statement": [
-		{
-			"Sid": "",
-			"Effect": "Allow",
-			"Principal": {
-				"Service": "elasticmapreduce.${data.aws_partition.current.dns_suffix}"
-			},
-		"Action": "sts:AssumeRole"
-		}
-	]
+  "Version": "2008-10-17",
+  "Statement": [
+      {
+          "Sid": "",
+          "Effect": "Allow",
+          "Principal": {
+              "Service": "elasticmapreduce.${data.aws_partition.current.dns_suffix}"
+          },
+      "Action": "sts:AssumeRole"
+      }
+  ]
 }
 EOT
 }
 resource "aws_iam_role_policy_attachment" "emr_service_placement_group" {
-	role       = aws_iam_role.emr_service.id
-	policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/service-role/AmazonEMRServicePolicy_v2"
+  role       = aws_iam_role.emr_service.id
+  policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/service-role/AmazonEMRServicePolicy_v2"
 }
 
 resource "aws_iam_role_policy_attachment" "emr_placementgroup" {
-    role       = aws_iam_role.emr_service.id
-    policy_arn = aws_iam_policy.emr_placementgroup.arn
-  }
-  
-  resource "aws_iam_policy" "emr_placementgroup" {
-    name = "%[1]s_placementgroup_profile"
-  
-    policy = <<EOT
+  role       = aws_iam_role.emr_service.id
+  policy_arn = aws_iam_policy.emr_placementgroup.arn
+}
+
+resource "aws_iam_policy" "emr_placementgroup" {
+  name = "%[1]s_placementgroup_profile"
+
+  policy = <<EOT
 {
-    "Version": "2012-10-17",
-    "Statement": [{
-        "Effect": "Allow",
-        "Resource": "arn:aws:ec2:*:*:placement-group/pg-*",
-        "Action": [
-            "ec2:CreatePlacementGroup",
-            "ec2:CreateTags",
-            "ec2:DeleteTags"
-        ]
-    },
-    {
-        "Sid": "PassRoleForEC2",
-        "Effect": "Allow",
-        "Action": "iam:PassRole",
-        "Resource": "${aws_iam_role.emr_instance_profile.arn}",
-        "Condition": {
-            "StringLike": {
-                "iam:PassedToService": "ec2.amazonaws.com*"
-            }
-        }
-    }]
+  "Version": "2012-10-17",
+  "Statement": [{
+      "Effect": "Allow",
+      "Resource": "arn:${data.aws_partition.current.partition}:ec2:*:*:placement-group/pg-*",
+      "Action": [
+          "ec2:CreatePlacementGroup",
+          "ec2:CreateTags",
+          "ec2:DeleteTags"
+      ]
+  },
+  {
+      "Sid": "PassRoleForEC2",
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "${aws_iam_role.emr_instance_profile.arn}",
+      "Condition": {
+          "StringLike": {
+              "iam:PassedToService": "ec2.amazonaws.com*"
+          }
+      }
+  }]
 }
 EOT
 }
@@ -4087,8 +4086,8 @@ resource "aws_emr_cluster" "test" {
   }
 
   master_instance_group {
-    instance_type = "c4.large"
-	instance_count = 3
+    instance_type  = "c4.large"
+    instance_count = 3
   }
 
   core_instance_group {
@@ -4101,7 +4100,7 @@ resource "aws_emr_cluster" "test" {
     dns_zone                                 = "env_zone"
     env                                      = "env"
     name                                     = "name-env"
-	for-use-with-amazon-emr-managed-policies = true
+    for-use-with-amazon-emr-managed-policies = true
   }
 
   keep_job_flow_alive_when_no_steps = true
@@ -4112,15 +4111,15 @@ resource "aws_emr_cluster" "test" {
   configurations = "test-fixtures/emr_configurations.json"
 
   placement_group_config {
-	instance_role = "MASTER"
-	placement_strategy = "SPREAD"
+    instance_role      = "MASTER"
+    placement_strategy = "SPREAD"
   }
 
   depends_on = [
     aws_route_table_association.test,
     aws_iam_role_policy_attachment.emr_instance_profile,
     aws_iam_role_policy_attachment.emr_autoscaling_role,
-	aws_iam_role_policy_attachment.emr_service_placement_group,
+    aws_iam_role_policy_attachment.emr_service_placement_group,
     aws_iam_role_policy_attachment.emr_placementgroup
   ]
 
@@ -4153,8 +4152,8 @@ resource "aws_emr_cluster" "test" {
   }
 
   master_instance_group {
-    instance_type = "c4.large"
-	instance_count = 3
+    instance_type  = "c4.large"
+    instance_count = 3
   }
 
   core_instance_group {
@@ -4167,7 +4166,7 @@ resource "aws_emr_cluster" "test" {
     dns_zone                                 = "env_zone"
     env                                      = "env"
     name                                     = "name-env"
-	for-use-with-amazon-emr-managed-policies = true
+    for-use-with-amazon-emr-managed-policies = true
   }
 
   keep_job_flow_alive_when_no_steps = true
@@ -4178,14 +4177,14 @@ resource "aws_emr_cluster" "test" {
   configurations = "test-fixtures/emr_configurations.json"
 
   placement_group_config {
-	instance_role = "MASTER"
+    instance_role = "MASTER"
   }
 
   depends_on = [
     aws_route_table_association.test,
     aws_iam_role_policy_attachment.emr_instance_profile,
     aws_iam_role_policy_attachment.emr_autoscaling_role,
-	aws_iam_role_policy_attachment.emr_service_placement_group,
+    aws_iam_role_policy_attachment.emr_service_placement_group,
     aws_iam_role_policy_attachment.emr_placementgroup
   ]
 
