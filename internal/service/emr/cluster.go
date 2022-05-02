@@ -459,6 +459,7 @@ func ResourceCluster() *schema.Resource {
 							Type:     schema.TypeString,
 							ForceNew: true,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
