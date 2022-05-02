@@ -443,6 +443,26 @@ func ResourceCluster() *schema.Resource {
 				ForceNew: true,
 				Required: true,
 			},
+			"placement_group_config": {
+				Type:       schema.TypeList,
+				ForceNew:   true,
+				Optional:   true,
+				ConfigMode: schema.SchemaConfigModeAttr,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"instance_role": {
+							Type:     schema.TypeString,
+							ForceNew: true,
+							Required: true,
+						},
+						"placement_strategy": {
+							Type:     schema.TypeString,
+							ForceNew: true,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"release_label": {
 				Type:     schema.TypeString,
 				ForceNew: true,
@@ -944,8 +964,14 @@ func resourceClusterCreate(d *schema.ResourceData, meta interface{}) error {
 		kerberosAttributesMap := kerberosAttributesList[0].(map[string]interface{})
 		params.KerberosAttributes = expandEmrKerberosAttributes(kerberosAttributesMap)
 	}
+
 	if v, ok := d.GetOk("auto_termination_policy"); ok && len(v.([]interface{})) > 0 {
 		params.AutoTerminationPolicy = expandAutoTerminationPolicy(v.([]interface{}))
+	}
+
+	if v, ok := d.GetOk("placement_group_config"); ok {
+		placementGroupConfigs := v.([]interface{})
+		params.PlacementGroupConfigs = expandPlacementGroupConfigs(placementGroupConfigs)
 	}
 
 	log.Printf("[DEBUG] EMR Cluster create options: %s", params)
@@ -1176,6 +1202,10 @@ func resourceClusterRead(d *schema.ResourceData, meta interface{}) error {
 
 	if err := d.Set("auto_termination_policy", flattenAutoTerminationPolicy(atpOut.AutoTerminationPolicy)); err != nil {
 		return fmt.Errorf("error setting auto_termination_policy: %w", err)
+	}
+
+	if err := d.Set("placement_group_config", flattenPlacementGroupConfigs(cluster.PlacementGroups)); err != nil {
+		return fmt.Errorf("error setting EMR Placement Group Configs: %w", err)
 	}
 
 	return nil
@@ -2267,4 +2297,44 @@ func flattenAutoTerminationPolicy(atp *emr.AutoTerminationPolicy) []map[string]i
 	result = append(result, attrs)
 
 	return result
+}
+
+func expandPlacementGroupConfigs(placementGroupConfigs []interface{}) []*emr.PlacementGroupConfig {
+	placementGroupConfigsOut := []*emr.PlacementGroupConfig{}
+
+	for _, raw := range placementGroupConfigs {
+		placementGroupAttributes := raw.(map[string]interface{})
+		instanceRole := placementGroupAttributes["instance_role"].(string)
+
+		placementGroupConfig := &emr.PlacementGroupConfig{
+			InstanceRole: aws.String(instanceRole),
+		}
+		if v, ok := placementGroupAttributes["placement_strategy"]; ok && v.(string) != "" {
+			placementGroupConfig.PlacementStrategy = aws.String(v.(string))
+		}
+		placementGroupConfigsOut = append(placementGroupConfigsOut, placementGroupConfig)
+	}
+
+	return placementGroupConfigsOut
+}
+
+func flattenPlacementGroupConfigs(placementGroupSpecifications []*emr.PlacementGroupConfig) []interface{} {
+	if placementGroupSpecifications == nil {
+		return []interface{}{}
+	}
+
+	placementGroupConfigs := make([]interface{}, 0)
+
+	for _, pgc := range placementGroupSpecifications {
+		placementGroupConfig := make(map[string]interface{})
+
+		placementGroupConfig["instance_role"] = aws.StringValue(pgc.InstanceRole)
+
+		if pgc.PlacementStrategy != nil {
+			placementGroupConfig["placement_strategy"] = aws.StringValue(pgc.PlacementStrategy)
+		}
+		placementGroupConfigs = append(placementGroupConfigs, placementGroupConfig)
+	}
+
+	return placementGroupConfigs
 }
