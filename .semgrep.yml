@@ -50,17 +50,6 @@ rules:
         - internal/service/elasticbeanstalk
         - internal/service/elasticsearch
         - internal/service/elb
-        - internal/service/emr
-        - internal/service/gamelift
-        - internal/service/iam
-        - internal/service/lambda
-        - internal/service/opsworks
-        - internal/service/rds
-        - internal/service/redshift
-        - internal/service/route53
-        - internal/service/s3
-        - internal/service/servicediscovery
-        - internal/service/ssm
     patterns:
       - pattern: '$LHS = *$RHS'
       - pattern-not: '*$LHS2 = *$RHS'
@@ -73,8 +62,6 @@ rules:
       include:
         - internal/service
       exclude:
-        - internal/service/**/*_test.go
-        - internal/service/dax
         - internal/service/docdb
         - internal/service/ec2
         - internal/service/ecs
