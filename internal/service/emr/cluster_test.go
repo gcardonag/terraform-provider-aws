@@ -4054,7 +4054,7 @@ resource "aws_iam_policy" "emr_placementgroup" {
       "Resource": "${aws_iam_role.emr_instance_profile.arn}",
       "Condition": {
           "StringLike": {
-              "iam:PassedToService": "ec2.amazonaws.com*"
+              "iam:PassedToService": "ec2.${data.aws_partition.current.dns_suffix}*"
           }
       }
   }]
