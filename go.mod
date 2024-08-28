@@ -8,8 +8,8 @@ require (
 	github.com/YakDriver/regexache v0.24.0
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/aws/aws-sdk-go-v2 v1.30.4
-	github.com/aws/aws-sdk-go-v2/config v1.27.28
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.28
+	github.com/aws/aws-sdk-go-v2/config v1.27.31
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.30
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.12
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.11
 	github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.32.4
@@ -93,7 +93,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/docdb v1.37.0
 	github.com/aws/aws-sdk-go-v2/service/docdbelastic v1.11.4
 	github.com/aws/aws-sdk-go-v2/service/drs v1.28.4
-	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.34.5
+	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.34.6
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.175.1
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.32.1
 	github.com/aws/aws-sdk-go-v2/service/ecrpublic v1.25.4
@@ -195,7 +195,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/route53recoveryreadiness v1.19.4
 	github.com/aws/aws-sdk-go-v2/service/route53resolver v1.30.4
 	github.com/aws/aws-sdk-go-v2/service/rum v1.19.4
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.59.0
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.60.1
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.46.4
 	github.com/aws/aws-sdk-go-v2/service/s3outposts v1.26.4
 	github.com/aws/aws-sdk-go-v2/service/sagemaker v1.153.1
@@ -215,7 +215,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/shield v1.27.4
 	github.com/aws/aws-sdk-go-v2/service/signer v1.24.4
 	github.com/aws/aws-sdk-go-v2/service/sns v1.31.4
-	github.com/aws/aws-sdk-go-v2/service/sqs v1.34.4
+	github.com/aws/aws-sdk-go-v2/service/sqs v1.34.5
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.52.5
 	github.com/aws/aws-sdk-go-v2/service/ssmcontacts v1.24.4
 	github.com/aws/aws-sdk-go-v2/service/ssmincidents v1.32.4
@@ -223,7 +223,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.22.5
 	github.com/aws/aws-sdk-go-v2/service/ssoadmin v1.27.5
 	github.com/aws/aws-sdk-go-v2/service/storagegateway v1.31.4
-	github.com/aws/aws-sdk-go-v2/service/sts v1.30.4
+	github.com/aws/aws-sdk-go-v2/service/sts v1.30.5
 	github.com/aws/aws-sdk-go-v2/service/swf v1.25.4
 	github.com/aws/aws-sdk-go-v2/service/synthetics v1.26.4
 	github.com/aws/aws-sdk-go-v2/service/timestreaminfluxdb v1.2.4
@@ -247,8 +247,8 @@ require (
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/google/go-cmp v0.6.0
 	github.com/hashicorp/aws-cloudformation-resource-schema-sdk-go v0.23.0
-	github.com/hashicorp/aws-sdk-go-base/v2 v2.0.0-beta.54
-	github.com/hashicorp/aws-sdk-go-base/v2/awsv1shim/v2 v2.0.0-beta.55
+	github.com/hashicorp/aws-sdk-go-base/v2 v2.0.0-beta.55
+	github.com/hashicorp/aws-sdk-go-base/v2/awsv1shim/v2 v2.0.0-beta.56
 	github.com/hashicorp/awspolicyequivalence v1.6.0
 	github.com/hashicorp/cli v1.1.6
 	github.com/hashicorp/go-cleanhttp v0.5.2
@@ -310,7 +310,7 @@ require (
 	github.com/evanphx/json-patch v0.5.2 // indirect
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/frankban/quicktest v1.14.6 // indirect
-	github.com/go-logr/logr v1.4.1 // indirect
+	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-test/deep v1.1.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
@@ -342,10 +342,10 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/zclconf/go-cty v1.15.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws v0.52.0 // indirect
-	go.opentelemetry.io/otel v1.27.0 // indirect
-	go.opentelemetry.io/otel/metric v1.27.0 // indirect
-	go.opentelemetry.io/otel/trace v1.27.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/github.com/aws/aws-sdk-go-v2/otelaws v0.53.0 // indirect
+	go.opentelemetry.io/otel v1.28.0 // indirect
+	go.opentelemetry.io/otel/metric v1.28.0 // indirect
+	go.opentelemetry.io/otel/trace v1.28.0 // indirect
 	golang.org/x/mod v0.20.0 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
