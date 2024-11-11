@@ -49,8 +49,8 @@ import (
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/internal/analysisflags"
+	"golang.org/x/tools/internal/analysisinternal"
 	"golang.org/x/tools/internal/facts"
-	"golang.org/x/tools/internal/typeparams"
 )
 
 // A Config describes a compilation unit to be analyzed.
@@ -65,6 +65,8 @@ type Config struct {
 	GoFiles                   []string
 	NonGoFiles                []string
 	IgnoredFiles              []string
+	ModulePath                string            // module path
+	ModuleVersion             string            // module version
 	ImportMap                 map[string]string // maps import path to package path
 	PackageFile               map[string]string // maps package path to file of type information
 	Standard                  map[string]bool   // package belongs to standard library
@@ -193,13 +195,7 @@ type factImporter = func(pkgPath string) ([]byte, error)
 // The defaults honor a Config in a manner compatible with 'go vet'.
 var (
 	makeTypesImporter = func(cfg *Config, fset *token.FileSet) types.Importer {
-		return importer.ForCompiler(fset, cfg.Compiler, func(importPath string) (io.ReadCloser, error) {
-			// Resolve import path to package path (vendoring, etc)
-			path, ok := cfg.ImportMap[importPath]
-			if !ok {
-				return nil, fmt.Errorf("can't resolve import %q", path)
-			}
-
+		compilerImporter := importer.ForCompiler(fset, cfg.Compiler, func(path string) (io.ReadCloser, error) {
 			// path is a resolved package path, not an import path.
 			file, ok := cfg.PackageFile[path]
 			if !ok {
@@ -209,6 +205,13 @@ var (
 				return nil, fmt.Errorf("no package file for %q", path)
 			}
 			return os.Open(file)
+		})
+		return importerFunc(func(importPath string) (*types.Package, error) {
+			path, ok := cfg.ImportMap[importPath] // resolve vendoring, etc
+			if !ok {
+				return nil, fmt.Errorf("can't resolve import %q", path)
+			}
+			return compilerImporter.Import(path)
 		})
 	}
 
@@ -253,14 +256,15 @@ func run(fset *token.FileSet, cfg *Config, analyzers []*analysis.Analyzer) ([]re
 		GoVersion: cfg.GoVersion,
 	}
 	info := &types.Info{
-		Types:      make(map[ast.Expr]types.TypeAndValue),
-		Defs:       make(map[*ast.Ident]types.Object),
-		Uses:       make(map[*ast.Ident]types.Object),
-		Implicits:  make(map[ast.Node]types.Object),
-		Scopes:     make(map[ast.Node]*types.Scope),
-		Selections: make(map[*ast.SelectorExpr]*types.Selection),
+		Types:        make(map[ast.Expr]types.TypeAndValue),
+		Defs:         make(map[*ast.Ident]types.Object),
+		Uses:         make(map[*ast.Ident]types.Object),
+		Implicits:    make(map[ast.Node]types.Object),
+		Instances:    make(map[*ast.Ident]types.Instance),
+		Scopes:       make(map[ast.Node]*types.Scope),
+		Selections:   make(map[*ast.SelectorExpr]*types.Selection),
+		FileVersions: make(map[*ast.File]string),
 	}
-	typeparams.InitInstanceInfo(info)
 
 	pkg, err := tc.Check(cfg.ImportPath, fset, files, info)
 	if err != nil {
@@ -318,7 +322,7 @@ func run(fset *token.FileSet, cfg *Config, analyzers []*analysis.Analyzer) ([]re
 	analyzers = filtered
 
 	// Read facts from imported packages.
-	facts, err := facts.NewDecoder(pkg).Decode(false, makeFactImporter(cfg))
+	facts, err := facts.NewDecoder(pkg).Decode(makeFactImporter(cfg))
 	if err != nil {
 		return nil, err
 	}
@@ -356,6 +360,12 @@ func run(fset *token.FileSet, cfg *Config, analyzers []*analysis.Analyzer) ([]re
 				factFilter[reflect.TypeOf(f)] = true
 			}
 
+			module := &analysis.Module{
+				Path:      cfg.ModulePath,
+				Version:   cfg.ModuleVersion,
+				GoVersion: cfg.GoVersion,
+			}
+
 			pass := &analysis.Pass{
 				Analyzer:          a,
 				Fset:              fset,
@@ -374,7 +384,9 @@ func run(fset *token.FileSet, cfg *Config, analyzers []*analysis.Analyzer) ([]re
 				ImportPackageFact: facts.ImportPackageFact,
 				ExportPackageFact: facts.ExportPackageFact,
 				AllPackageFacts:   func() []analysis.PackageFact { return facts.AllPackageFacts(factFilter) },
+				Module:            module,
 			}
+			pass.ReadFile = analysisinternal.MakeReadFile(pass)
 
 			t0 := time.Now()
 			act.result, act.err = a.Run(pass)
@@ -417,7 +429,7 @@ func run(fset *token.FileSet, cfg *Config, analyzers []*analysis.Analyzer) ([]re
 		results[i].diagnostics = act.diagnostics
 	}
 
-	data := facts.Encode(false)
+	data := facts.Encode()
 	if err := exportFacts(cfg, data); err != nil {
 		return nil, fmt.Errorf("failed to export analysis facts: %v", err)
 	}
@@ -433,3 +445,7 @@ type result struct {
 	diagnostics []analysis.Diagnostic
 	err         error
 }
+
+type importerFunc func(path string) (*types.Package, error)
+
+func (f importerFunc) Import(path string) (*types.Package, error) { return f(path) }
